@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.33214.272
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeteaseMusicCacheManager", "NeteaseMusicCacheManager.csproj", "{D5D16348-BA9F-4C50-B540-FB2890E32F56}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5D16348-BA9F-4C50-B540-FB2890E32F56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5D16348-BA9F-4C50-B540-FB2890E32F56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5D16348-BA9F-4C50-B540-FB2890E32F56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5D16348-BA9F-4C50-B540-FB2890E32F56}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {03CC4D20-43B1-495E-A9C4-6C77EA70120E}
+	EndGlobalSection
+EndGlobal
