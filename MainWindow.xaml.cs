@@ -43,6 +43,7 @@ namespace NeteaseMusicCacheManager
 
 		private void BtnGetCaches_Click(object sender, RoutedEventArgs e)
 		{
+			lstCache.Items.Clear();
 			string[] files = Directory.GetFiles(cachePath, "*.uc");
 			for(int i = 0; i < files.Length; i++)
 			{
