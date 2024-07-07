@@ -4,7 +4,6 @@ using System.IO;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -50,7 +49,7 @@ namespace NeteaseMusicCacheManager
 				string filePath = files[i];
 				string id = GetMusicIdFromPath(filePath);
 				MusicObject objMusic = new MusicObject(id, id, filePath);
-				System.Runtime.CompilerServices.TaskAwaiter<string> awaiter = GetMusicNameFromIdAsync(id).GetAwaiter();
+				TaskAwaiter<string> awaiter = GetMusicNameFromIdAsync(id).GetAwaiter();
 				awaiter.OnCompleted(() =>
 				{
 					objMusic.Name = awaiter.GetResult();
@@ -141,7 +140,8 @@ namespace NeteaseMusicCacheManager
 				catch (IOException e)
 				{
 					MessageBox.Show("引发异常：\n" + e.Message, "错误：", MessageBoxButton.OK, MessageBoxImage.Warning);
-					return "";
+					// 弹计算器了.jpg
+					return "calc.exe";
 				}
 				return targetPath;
 			});
@@ -166,6 +166,10 @@ namespace NeteaseMusicCacheManager
 
 		private string GetMusicObjPath(Object music)
 		{
+			if(music == null)
+			{
+				return "huh";
+			}
 			return ((MusicObject)music).Path;
 		}
 	}
