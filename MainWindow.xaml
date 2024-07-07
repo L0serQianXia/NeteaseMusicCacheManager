@@ -16,11 +16,12 @@
 		<Label x:Name="labelCachePath" Content="获取中..." Height="26" Margin="109,8,138,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
 		<Button x:Name="btnPlay" Click="BtnPlay_Click"  Content="播放" Grid.Column="1" HorizontalAlignment="Left" Margin="499,75,0,0" VerticalAlignment="Top" Width="74"/>
 		<Button x:Name="btnDecrypt" Content="提取" Click="BtnDecrypt_Click" Grid.Column="1" HorizontalAlignment="Left" Margin="499,294,0,0" VerticalAlignment="Top" Width="74"/>
-		<Button x:Name="btnDecryptAll" Content="全部提取" Click="BtnDecryptAll_Click" HorizontalAlignment="Left" Margin="389,336,0,0" VerticalAlignment="Top" Width="74" Grid.Column="1"/>
+		<Button x:Name="btnDecryptAll" Content="全部提取" Click="BtnDecryptAll_Click" HorizontalAlignment="Left" Margin="389,327,0,0" VerticalAlignment="Top" Width="74" Grid.Column="1"/>
 		<Button x:Name="btnGetCaches" Content="获取" Click="BtnGetCaches_Click" HorizontalAlignment="Left" Margin="499,10,0,0" VerticalAlignment="Top" Width="74" Grid.Column="1"/>
 		<Label Content="提取路径：" HorizontalAlignment="Left" Height="26" Margin="45,34,0,0" VerticalAlignment="Top" Width="64"/>
 		<Label x:Name="labelDecryptPath" Content="加载中..." Height="26" Margin="109,34,138,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
 		<Button x:Name="btnLocateDecryptFolder" Content="定位" Click="BtnLocateDecryptFolder_Click" HorizontalAlignment="Left" Margin="499,38,0,0" VerticalAlignment="Top" Width="74" Grid.Column="1"/>
+		<Label x:Name="labelMusicCount" Content="共 0 项" HorizontalAlignment="Left" Margin="45,323,0,0" VerticalAlignment="Top"/>
 
 	</Grid>
 </Window>

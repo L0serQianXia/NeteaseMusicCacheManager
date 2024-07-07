@@ -41,7 +41,6 @@ namespace NeteaseMusicCacheManager
 			httpClient.BaseAddress = new Uri("https://music.163.com/api/song/detail");
 		}
 
-		// TODO: 添加缓存文件总数量
 		private void BtnGetCaches_Click(object sender, RoutedEventArgs e)
 		{
 			string[] files = Directory.GetFiles(cachePath, "*.uc");
@@ -55,6 +54,7 @@ namespace NeteaseMusicCacheManager
 				{
 					objMusic.Name = awaiter.GetResult();
 					lstCache.Items.Add(objMusic);
+					labelMusicCount.Content = string.Format("共 {0} 项", lstCache.Items.Count);
 				});
 			}
 		}
