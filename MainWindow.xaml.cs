@@ -53,7 +53,7 @@ namespace NeteaseMusicCacheManager
 			{
 				string filePath = files[i];
 				string id = GetMusicIdFromPath(filePath);
-				MusicObject objMusic = new MusicObject("", "", id, filePath);
+				MusicObject objMusic = new MusicObject("", "", id, filePath, File.GetLastWriteTime(filePath));
 				TaskAwaiter<string[]> awaiter = GetMusicInfoFromIdAsync(id).GetAwaiter();
 				awaiter.OnCompleted(() =>
 				{
@@ -79,7 +79,7 @@ namespace NeteaseMusicCacheManager
 		private void BtnDecrypt_Click(object sender, RoutedEventArgs e)
 		{
 			string selectedMusicPath = GetMusicObjPath(lstCache.SelectedItem);
-			string musicPath = DecryptCache(selectedMusicPath, labelDecryptPath.Content + "\\" + lstCache.SelectedItem.ToString() + ".mp3");
+			string musicPath = DecryptCache(selectedMusicPath, labelDecryptPath.Content + "\\" + GetMusicObjStoreName(lstCache.SelectedItem) + ".mp3");
 			MessageBox.Show("提取完毕！文件存储为" + musicPath, "提示：", MessageBoxButton.OK, MessageBoxImage.Information);
 		}
 
@@ -90,7 +90,7 @@ namespace NeteaseMusicCacheManager
 			for(int i = 0; i < caches.Count; i++)
 			{
 				string path = GetMusicObjPath(caches.GetItemAt(i));
-				TaskAwaiter<string> awaiter = DecryptCacheAwait(path, labelDecryptPath.Content + "\\" + caches.GetItemAt(i).ToString() + ".mp3").GetAwaiter();
+				TaskAwaiter<string> awaiter = DecryptCacheAwait(path, labelDecryptPath.Content + "\\" + GetMusicObjStoreName(caches.GetItemAt(i)) + ".mp3").GetAwaiter();
 				awaiter.OnCompleted(() => labelWorkingInfo.Content = string.Format("提取音乐“{0}”完成！进度：{1}/{2}", ((MusicObject)caches.GetItemAt(counter - 1)).Name, counter++, caches.Count));
 			}
 			MessageBox.Show("提取完毕！文件存储于" + labelDecryptPath.Content, "提示：", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -186,6 +186,15 @@ namespace NeteaseMusicCacheManager
 				return "huh";
 			}
 			return ((MusicObject)music).Path;
+		}
+
+		private string GetMusicObjStoreName(object music)
+		{
+			if (music == null)
+			{
+				return "huh";
+			}
+			return ((MusicObject)music).Name + " - " + ((MusicObject)music).Author;
 		}
 
 		private string GetAuthorFromDetail(string detail)
