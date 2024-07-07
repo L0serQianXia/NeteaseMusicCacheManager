@@ -125,7 +125,7 @@ namespace NeteaseMusicCacheManager
 				try
 				{
 					// 异或A3进行解密
-					FileStream fileIn = File.OpenRead(path);
+					FileStream fileIn = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 					FileStream fileOut = File.OpenWrite(targetPath);
 					byte[] b = new byte[1024];
 					while (fileIn.Read(b, 0, b.Length) > 0)
