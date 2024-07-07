@@ -49,11 +49,12 @@ namespace NeteaseMusicCacheManager
 			{
 				string filePath = files[i];
 				string id = GetMusicIdFromPath(filePath);
-				MusicObject objMusic = new MusicObject(id, id, filePath);
-				TaskAwaiter<string> awaiter = GetMusicNameFromIdAsync(id).GetAwaiter();
+				MusicObject objMusic = new MusicObject("", "", id, filePath);
+				TaskAwaiter<string[]> awaiter = GetMusicInfoFromIdAsync(id).GetAwaiter();
 				awaiter.OnCompleted(() =>
 				{
-					objMusic.Name = awaiter.GetResult();
+					objMusic.Name = awaiter.GetResult()[0];
+					objMusic.Author = awaiter.GetResult()[1];
 					lstCache.Items.Add(objMusic);
 					labelMusicCount.Content = string.Format("共 {0} 项", lstCache.Items.Count);
 				});
@@ -74,7 +75,7 @@ namespace NeteaseMusicCacheManager
 		private void BtnDecrypt_Click(object sender, RoutedEventArgs e)
 		{
 			string selectedMusicPath = GetMusicObjPath(lstCache.SelectedItem);
-			string musicPath = DecryptCache(selectedMusicPath, labelDecryptPath.Content + "\\" + GetMusicObjName(lstCache.SelectedItem) + ".mp3");
+			string musicPath = DecryptCache(selectedMusicPath, labelDecryptPath.Content + "\\" + lstCache.SelectedItem.ToString() + ".mp3");
 			MessageBox.Show("提取完毕！文件存储为" + musicPath, "提示：", MessageBoxButton.OK, MessageBoxImage.Information);
 		}
 
@@ -85,7 +86,7 @@ namespace NeteaseMusicCacheManager
 			for(int i = 0; i < caches.Count; i++)
 			{
 				string path = GetMusicObjPath(caches.GetItemAt(i));
-				TaskAwaiter<string> awaiter = DecryptCacheAwait(path, labelDecryptPath.Content + "\\" + GetMusicObjName(caches.GetItemAt(i)) + ".mp3").GetAwaiter();
+				TaskAwaiter<string> awaiter = DecryptCacheAwait(path, labelDecryptPath.Content + "\\" + caches.GetItemAt(i).ToString() + ".mp3").GetAwaiter();
 				awaiter.OnCompleted(() => labelWorkingInfo.Content = string.Format("提取音乐“{0}”完成！进度：{1}/{2}", ((MusicObject)caches.GetItemAt(counter - 1)).Name, counter++, caches.Count));
 			}
 			MessageBox.Show("提取完毕！文件存储于" + labelDecryptPath.Content, "提示：", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -156,13 +157,22 @@ namespace NeteaseMusicCacheManager
 			return s;
 		}
 
-		private async Task<string> GetMusicNameFromIdAsync(string id)
+		// [0]=Name
+		// [1]=Author
+		private async Task<string[]> GetMusicInfoFromIdAsync(string id)
+		{
+			string detail = await GetMusicDetailFromId(id);
+			string author = GetAuthorFromDetail(detail);
+			detail = detail.Substring(0, detail.IndexOf("\",\"id\":" + id));
+			detail = detail.Replace("{\"songs\":[{\"name\":\"", "");
+			string[] result = { detail, author };
+			return result;
+		}
+
+		private async Task<string> GetMusicDetailFromId(string id)
 		{
 			HttpResponseMessage response = await httpClient.GetAsync("?id=" + id + "&ids=%5B" + id + "%5D");
-			string result = await response.Content.ReadAsStringAsync();
-			result = result.Substring(0, result.IndexOf("\",\"id\":" + id));
-			result = result.Replace("{\"songs\":[{\"name\":\"", "");
-			return result;
+			return await response.Content.ReadAsStringAsync();
 		}
 
 		private string GetMusicObjPath(Object music)
@@ -174,13 +184,19 @@ namespace NeteaseMusicCacheManager
 			return ((MusicObject)music).Path;
 		}
 
-		private string GetMusicObjName(Object music)
+		private string GetAuthorFromDetail(string detail)
 		{
-			if (music == null)
+			StringBuilder builder = new StringBuilder();
+			detail = detail.Substring(detail.IndexOf("\"artists\":[") + 11);
+			detail = detail.Substring(0, detail.LastIndexOf("\"album\":{\"name\""));
+			while (detail.IndexOf("{\"name\":\"") != -1)
 			{
-				return "huh";
+				detail = detail.Substring(detail.IndexOf("{\"name\":\"") + 9);
+				builder.Append(detail.Substring(0, detail.IndexOf("\",\"id\":"))).Append(",");
+				detail = detail.Substring(detail.IndexOf("\",\"id\":") + 1);
 			}
-			return ((MusicObject)music).Name;
+			builder.Remove(builder.Length - 1, 1);
+			return builder.ToString();
 		}
 	}
 }

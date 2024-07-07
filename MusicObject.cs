@@ -11,17 +11,19 @@ namespace NeteaseMusicCacheManager
 		public string Name { get; set; }
 		public string Id { get; set; }
 		public string Path { get; set; }
+		public string Author { get; set; }
 
-		public MusicObject(string name, string id, string path)
+		public MusicObject(string name, string author, string id, string path)
 		{
 			Name = name;
 			Id = id;
 			Path = path;
+			Author = author;
 		}
 
 		public override string ToString()
 		{
-			return Name;
+			return Name + " - " + Author;
 		}
 	}
 }
