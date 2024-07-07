@@ -14,12 +14,16 @@ namespace NeteaseMusicCacheManager
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		public const string VERSION = "v1.0";
+
 		private static HttpClient httpClient = new HttpClient();
 		private string cachePath;
 
 		public MainWindow()
 		{
 			InitializeComponent();
+			StartWindow.Title = StartWindow.Title + " " + VERSION;
+
 			if (!Directory.Exists(".\\NeteaseMusicCacheManager"))
 			{
 				Directory.CreateDirectory(".\\NeteaseMusicCacheManager");
