@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace NeteaseMusicCacheManager
@@ -11,6 +14,7 @@ namespace NeteaseMusicCacheManager
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		private static HttpClient httpClient = new HttpClient();
 		private string cachePath;
 
 		public MainWindow()
@@ -34,6 +38,7 @@ namespace NeteaseMusicCacheManager
 				Environment.Exit(-1);
 			}
 			labelCachePath.Content = cachePath;
+			httpClient.BaseAddress = new Uri("https://music.163.com/api/song/detail");
 		}
 
 		// TODO: 添加缓存文件总数量
@@ -43,15 +48,20 @@ namespace NeteaseMusicCacheManager
 			for(int i = 0; i < files.Length; i++)
 			{
 				string filePath = files[i];
-				lstCache.Items.Add(filePath);
-				//TODO: 这里改成API获取歌曲名称: https://music.163.com/api/song/detail/?id={ID}&ids=%5B{ID}%5D
-				//filePath.Substring(filePath.LastIndexOf(Path.DirectorySeparatorChar));
+				string id = GetMusicIdFromPath(filePath);
+				MusicObject objMusic = new MusicObject(id, id, filePath);
+				System.Runtime.CompilerServices.TaskAwaiter<string> awaiter = GetMusicNameFromIdAsync(id).GetAwaiter();
+				awaiter.OnCompleted(() =>
+				{
+					objMusic.Name = awaiter.GetResult();
+					lstCache.Items.Add(objMusic);
+				});
 			}
 		}
 
 		private void BtnPlay_Click(object sender, RoutedEventArgs e)
 		{
-			string selectedMusicPath = lstCache.SelectedItem.ToString();
+			string selectedMusicPath = GetMusicObjPath(lstCache.SelectedItem);
 			string musicLocation = DecryptCache(selectedMusicPath);
 			// 调用系统默认播放器播放音乐
 			Process process = new Process();
@@ -62,7 +72,7 @@ namespace NeteaseMusicCacheManager
 
 		private void BtnDecrypt_Click(object sender, RoutedEventArgs e)
 		{
-			string selectedMusicPath = lstCache.SelectedItem.ToString();
+			string selectedMusicPath = GetMusicObjPath(lstCache.SelectedItem);
 			string musicPath = DecryptCache(selectedMusicPath, labelDecryptPath.Content + "\\" + GetMusicIdFromPath(selectedMusicPath) + ".mp3");
 			MessageBox.Show("提取完毕！文件存储为" + musicPath, "提示：", MessageBoxButton.OK, MessageBoxImage.Information);
 		}
@@ -73,7 +83,7 @@ namespace NeteaseMusicCacheManager
 			System.Windows.Controls.ItemCollection caches = lstCache.Items;
 			for(int i = 0; i < caches.Count; i++)
 			{
-				string path = caches.GetItemAt(i).ToString();
+				string path = GetMusicObjPath(caches.GetItemAt(i));
 				DecryptCache(path, labelDecryptPath.Content + "\\" + GetMusicIdFromPath(path) + ".mp3");
 			}
 			MessageBox.Show("提取完毕！文件存储于" + labelDecryptPath.Content, "提示：", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -128,10 +138,24 @@ namespace NeteaseMusicCacheManager
 
 		private string GetMusicIdFromPath(string fullPathStr)
 		{
-			string s = fullPathStr.Substring(fullPathStr.LastIndexOf("\\"));
+			string s = fullPathStr.Substring(fullPathStr.LastIndexOf("\\") + 1);
 			s = s.Replace(".uc", "");
 			s = s.Substring(0, s.IndexOf("-"));
 			return s;
+		}
+
+		private async Task<string> GetMusicNameFromIdAsync(string id)
+		{
+			HttpResponseMessage response = await httpClient.GetAsync("?id=" + id + "&ids=%5B" + id + "%5D");
+			string result = await response.Content.ReadAsStringAsync();
+			result = result.Substring(0, result.IndexOf("\",\"id\":" + id));
+			result = result.Replace("{\"songs\":[{\"name\":\"", "");
+			return result;
+		}
+
+		private string GetMusicObjPath(Object music)
+		{
+			return ((MusicObject)music).Path;
 		}
 	}
 }
