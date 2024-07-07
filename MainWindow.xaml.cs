@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -77,14 +78,15 @@ namespace NeteaseMusicCacheManager
 			MessageBox.Show("提取完毕！文件存储为" + musicPath, "提示：", MessageBoxButton.OK, MessageBoxImage.Information);
 		}
 
-		// TODO: 添加提取进度
+		private int counter = 1;
 		private void BtnDecryptAll_Click(object sender, RoutedEventArgs e)
 		{
 			System.Windows.Controls.ItemCollection caches = lstCache.Items;
 			for(int i = 0; i < caches.Count; i++)
 			{
 				string path = GetMusicObjPath(caches.GetItemAt(i));
-				DecryptCache(path, labelDecryptPath.Content + "\\" + GetMusicIdFromPath(path) + ".mp3");
+				TaskAwaiter<string> awaiter = DecryptCacheAwait(path, labelDecryptPath.Content + "\\" + GetMusicIdFromPath(path) + ".mp3").GetAwaiter();
+				awaiter.OnCompleted(() => labelWorkingInfo.Content = string.Format("提取音乐“{0}”完成！进度：{1}/{2}", ((MusicObject)caches.GetItemAt(counter - 1)).Name, counter++, caches.Count));
 			}
 			MessageBox.Show("提取完毕！文件存储于" + labelDecryptPath.Content, "提示：", MessageBoxButton.OK, MessageBoxImage.Information);
 		}
@@ -101,39 +103,48 @@ namespace NeteaseMusicCacheManager
 
 		private string DecryptCache(string path, string targetPath = "")
 		{
-			// 未提供目标路径，则创建临时文件
-			if (string.IsNullOrWhiteSpace(targetPath))
-			{
-				// 创建临时文件，并修改后缀为MP3
-				targetPath = Path.GetTempFileName();
-				string newName = Path.ChangeExtension(targetPath, ".mp3");
-				File.Move(targetPath, newName);
-				targetPath = newName;
-			}
+			Task<string> task = DecryptCacheAwait(path, targetPath);
+			task.Wait();
+			return task.Result;
+		}
 
-			try
-			{
-				// 异或A3进行解密
-				FileStream fileIn = File.OpenRead(path);
-				FileStream fileOut = File.OpenWrite(targetPath);
-				byte[] b = new byte[1024];
-				while (fileIn.Read(b, 0, b.Length) > 0)
+		private Task<string> DecryptCacheAwait(string path, string targetPath = "")
+		{
+			return Task.Run(()=>{
+				// 未提供目标路径，则创建临时文件
+				if (string.IsNullOrWhiteSpace(targetPath))
 				{
-					for (int i = 0; i < b.Length; i++)
-					{
-						b[i] ^= 0xA3;
-					}
-					fileOut.Write(b, 0, b.Length);
+					// 创建临时文件，并修改后缀为MP3
+					targetPath = Path.GetTempFileName();
+					string newName = Path.ChangeExtension(targetPath, ".mp3");
+					File.Move(targetPath, newName);
+					targetPath = newName;
 				}
-				fileOut.Close();
-				fileIn.Close();
-			}
-			catch(IOException e)
-			{
-				MessageBox.Show("引发异常：\n" + e.Message, "错误：", MessageBoxButton.OK, MessageBoxImage.Warning);
-				return "";
-			}
-			return targetPath;
+
+				try
+				{
+					// 异或A3进行解密
+					FileStream fileIn = File.OpenRead(path);
+					FileStream fileOut = File.OpenWrite(targetPath);
+					byte[] b = new byte[1024];
+					while (fileIn.Read(b, 0, b.Length) > 0)
+					{
+						for (int i = 0; i < b.Length; i++)
+						{
+							b[i] ^= 0xA3;
+						}
+						fileOut.Write(b, 0, b.Length);
+					}
+					fileOut.Close();
+					fileIn.Close();
+				}
+				catch (IOException e)
+				{
+					MessageBox.Show("引发异常：\n" + e.Message, "错误：", MessageBoxButton.OK, MessageBoxImage.Warning);
+					return "";
+				}
+				return targetPath;
+			});
 		}
 
 		private string GetMusicIdFromPath(string fullPathStr)

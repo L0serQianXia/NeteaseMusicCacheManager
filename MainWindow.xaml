@@ -22,6 +22,7 @@
 		<Label x:Name="labelDecryptPath" Content="加载中..." Height="26" Margin="109,34,138,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
 		<Button x:Name="btnLocateDecryptFolder" Content="定位" Click="BtnLocateDecryptFolder_Click" HorizontalAlignment="Left" Margin="499,38,0,0" VerticalAlignment="Top" Width="74" Grid.Column="1"/>
 		<Label x:Name="labelMusicCount" Content="共 0 项" HorizontalAlignment="Left" Margin="45,323,0,0" VerticalAlignment="Top"/>
+		<Label x:Name="labelWorkingInfo" Content="加载完成。" HorizontalAlignment="Left" Margin="45,384,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="609"/>
 
 	</Grid>
 </Window>
