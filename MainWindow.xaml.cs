@@ -167,6 +167,10 @@ namespace NeteaseMusicCacheManager
 		{
 			string detail = await GetMusicDetailFromId(id);
 			string author = GetAuthorFromDetail(detail);
+			if (detail.Contains("{\"songs\":[{\"name\":null,"))
+			{
+				return new string[] { id, "来自我的音乐云盘" };
+			}
 			detail = detail.Substring(0, detail.IndexOf("\",\"id\":" + id));
 			detail = detail.Replace("{\"songs\":[{\"name\":\"", "");
 			string[] result = { detail, author };
